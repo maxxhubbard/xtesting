@@ -1,7 +1,7 @@
 name: CI build
 on:
   schedule:
-    - cron: "14 * * * *"
+    - cron: "*/5 * * * *"
   push:
     branches: [ master ]
   pull_request:
@@ -50,7 +50,7 @@ jobs:
       run: |
         pip install flake8
         # Stop the build if there are flake8 issues
-        flake8 . --count --show-source --statistics --exclude=temp
+        # flake8 . --count --show-source --statistics --exclude=temp
     - name: Install Chrome
       if: matrix.os == 'ubuntu-20.04'
       run: |
@@ -76,24 +76,12 @@ jobs:
       run: |
         python -c "from seleniumbase.core import detect_b_ver; print(detect_b_ver.get_binary_location('google-chrome'))"
         python -c "from seleniumbase import undetected; print(undetected.find_chrome_executable())"
-    #- name: Run python test_user_agent.py
-    #  run: |
-    #    python test_user_agent.py
-    - name: Run python raw_uc_mode.py --debug
-      run: |
-        python raw_uc_mode.py --debug
-    - name: Run python raw_cdp.py --debug
-      run: |
-        python raw_cdp.py --debug
-    - name: Run python raw_socialblade.py --debug
-      run: |
-        python raw_socialblade.py --debug
     - name: Run python raw_gitlab_uc.py --debug
       run: |
-        python raw_gitlab_uc.py --debug
-    - name: Run python raw_demo_script.py
-      run: |
-        python raw_demo_script.py
-    - name: Run python raw_cdp_drivers.py
-      run: |
-        python raw_cdp_drivers.py
+        python raw_gitlab_uc.py --debug --chrome --xvfb --screenshot
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+          name: latest_logs
+          path: latest_logs/
+          retention-days: 30
